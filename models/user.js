@@ -27,7 +27,6 @@ class User {
         RETURNING username, password, first_name, last_name, phone`,
       [username, hashedPassword, first_name, last_name, phone]
     );
-    // console.log(user.rows[0])
 
     return result.rows[0];
   }
@@ -50,15 +49,20 @@ class User {
     return false;
   }
 
-  /** Update last_login_at for user */
+  /** Update last_login_at for user
+   * throws error is no user found
+   */
 
   static async updateLoginTimestamp(username) {
-    await db.query(
+    const result = await db.query(
       `UPDATE users
         SET last_login_at = CURRENT_TIMESTAMP
-        WHERE username = $1`,
+        WHERE username = $1
+        RETURNING username`,
       [username]
     );
+
+    if(!result.rows[0]) throw new NotFoundError(`No such user: ${username}`)
   }
 
   /** All: basic info on all users:
@@ -67,11 +71,10 @@ class User {
   static async all() {
     const results = await db.query(
       `SELECT username, first_name, last_name
-      FROM users`
+      FROM users
+      ORDER BY username`
     );
-    if (!results.rows) {
-      throw new NotFoundError("No users exist");
-    }
+
     return results.rows;
   }
 
@@ -82,7 +85,9 @@ class User {
    *          last_name,
    *          phone,
    *          join_at,
-   *          last_login_at } */
+   *          last_login_at }
+   *
+   * If no user throws error*/
 
   static async get(username) {
 
@@ -111,6 +116,8 @@ class User {
    *
    * where to_user is
    *   {username, first_name, last_name, phone}
+   *
+   * If messages can't be found throws error
    */
 
   static async messagesFrom(username) {
@@ -125,14 +132,17 @@ class User {
               t.phone
       FROM messages as m
               JOIN users AS t ON m.to_username = t.username
-      WHERE from_username = $1`,
+      WHERE from_username = $1
+      ORDER BY m.sent_at DESC`,
       [username]
     );
-    const m = results.rows;
+    const ms = results.rows;
 
-    if (!m) throw new NotFoundError(`No messages from: ${username}`);
+    if (ms.length === 0){
+      return ms
+    };
 
-    return m.map(m => m = {
+    return ms.map(m =>  ({
       id: m.id,
       to_user: {
         username: m.to_user,
@@ -143,7 +153,7 @@ class User {
       body: m.body,
       sent_at: m.sent_at,
       read_at: m.read_at
-    });
+    }));
   }
 
 
@@ -153,6 +163,8 @@ class User {
    *
    * where from_user is
    *   {id, first_name, last_name, phone}
+   *
+   * If messages can't be found throws error
    */
 
   static async messagesTo(username) {
@@ -167,14 +179,17 @@ class User {
               f.phone
       FROM messages as m
               JOIN users AS f ON m.from_username = f.username
-      WHERE to_username = $1`,
+      WHERE to_username = $1
+      ORDER BY m.sent_at DESC`,
       [username]
     );
-    const m = results.rows;
+    const ms = results.rows;
 
-    if (!m) throw new NotFoundError(`No messages to: ${username}`);
+    if (ms.length === 0){
+      return ms
+    };
 
-    return m.map(m => m = {
+    return ms.map(m => m = {
       id: m.id,
       from_user: {
         username: m.from_user,

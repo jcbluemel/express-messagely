@@ -31,7 +31,7 @@ class User {
       [username, hashedPassword, first_name, last_name, phone]
     )
 
-    return user;
+    return user.rows[0];
   }
 
   /** Authenticate: is username/password valid? Returns boolean. */

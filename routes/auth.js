@@ -16,8 +16,10 @@ const router = new Router();
 router.post("/login", async function (req, res, next) {
 
   const { username, password } = req.body;
-  if(User.authenticate(username, password)) {
 
+  if (await User.authenticate(username, password)) {
+
+    await User.updateLoginTimestamp(username);
     const token = jwt.sign(username, SECRET_KEY);
 
     return res.json({ token });
@@ -29,5 +31,16 @@ router.post("/login", async function (req, res, next) {
  *
  * {username, password, first_name, last_name, phone} => {token}.
  */
+
+router.post("/register", async function (req, res, next) {
+
+const { username, password, first_name, last_name, phone } = req.body;
+
+const user = await User.register(
+  username, password, first_name, last_name, phone);
+
+
+});
+
 
 module.exports = router;

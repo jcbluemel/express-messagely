@@ -62,7 +62,7 @@ class User {
       [username]
     );
 
-    if(!result.rows[0]) throw new NotFoundError(`No such user: ${username}`)
+    if (!result.rows[0]) throw new NotFoundError(`No such user: ${username}`);
   }
 
   /** All: basic info on all users:
@@ -138,11 +138,11 @@ class User {
     );
     const ms = results.rows;
 
-    if (ms.length === 0){
-      return ms
+    if (ms.length === 0) {
+      return ms;
     };
 
-    return ms.map(m =>  ({
+    return ms.map(m => ({
       id: m.id,
       to_user: {
         username: m.to_user,
@@ -185,8 +185,8 @@ class User {
     );
     const ms = results.rows;
 
-    if (ms.length === 0){
-      return ms
+    if (ms.length === 0) {
+      return ms;
     };
 
     return ms.map(m => m = {

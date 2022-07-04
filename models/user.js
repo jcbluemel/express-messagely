@@ -65,6 +65,14 @@ class User {
    * [{username, first_name, last_name}, ...] */
 
   static async all() {
+    const results = await db.query(
+      `SELECT username, first_name, last_name
+      FROM users`
+    );
+    if (!results.rows) {
+      throw new NotFoundError("No users exist");
+    }
+    return results.rows;
   }
 
   /** Get: get user by username
@@ -106,7 +114,38 @@ class User {
    */
 
   static async messagesFrom(username) {
+    const results = await db.query(
+      `SELECT m.id,
+              m.to_username as to_user,
+              m.body,
+              m.sent_at,
+              m.read_at,
+              t.first_name,
+              t.last_name,
+              t.phone
+      FROM messages as m
+              JOIN users AS t ON m.to_username = t.username
+      WHERE from_username = $1`,
+      [username]
+    );
+    const m = results.rows;
+
+    if (!m) throw new NotFoundError(`No messages from: ${username}`);
+
+    return m.map(m => m = {
+      id: m.id,
+      to_user: {
+        username: m.to_user,
+        first_name: m.first_name,
+        last_name: m.last_name,
+        phone: m.phone
+      },
+      body: m.body,
+      sent_at: m.sent_at,
+      read_at: m.read_at
+    });
   }
+
 
   /** Return messages to this user.
    *
@@ -117,6 +156,36 @@ class User {
    */
 
   static async messagesTo(username) {
+    const results = await db.query(
+      `SELECT m.id,
+              m.from_username as from_user,
+              m.body,
+              m.sent_at,
+              m.read_at,
+              f.first_name,
+              f.last_name,
+              f.phone
+      FROM messages as m
+              JOIN users AS f ON m.from_username = f.username
+      WHERE to_username = $1`,
+      [username]
+    );
+    const m = results.rows;
+
+    if (!m) throw new NotFoundError(`No messages to: ${username}`);
+
+    return m.map(m => m = {
+      id: m.id,
+      from_user: {
+        username: m.from_user,
+        first_name: m.first_name,
+        last_name: m.last_name,
+        phone: m.phone
+      },
+      body: m.body,
+      sent_at: m.sent_at,
+      read_at: m.read_at
+    });
   }
 }
 

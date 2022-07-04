@@ -1,5 +1,10 @@
 "use strict";
 
+const db = require("../db");
+const bcrypt = require("bcrypt");
+const { BCRYPT_WORK_FACTOR } = require("../config");
+
+
 /** User of the site. */
 
 class User {
@@ -9,6 +14,24 @@ class User {
    */
 
   static async register({ username, password, first_name, last_name, phone }) {
+
+    //FIXME: can we use arguments[0] instead?
+    // const { username, password, first_name, last_name, phone } = {
+    //    username, password, first_name, last_name, phone }
+
+    const hashedPassword = await bcrypt.hash(
+      password, BCRYPT_WORK_FACTOR);
+
+    const user = await db.query(
+      `INSERT INTO users
+          (username, password, first_name, last_name, phone, join_at)
+        VALUES
+          ($1, $2, $3, $4, $5, NOW())
+        RETURNING username, password, first_name, last_name, phone`,
+      [username, hashedPassword, first_name, last_name, phone]
+    )
+
+    return user;
   }
 
   /** Authenticate: is username/password valid? Returns boolean. */

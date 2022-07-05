@@ -3,7 +3,7 @@
 const db = require("../db");
 const bcrypt = require("bcrypt");
 const { BCRYPT_WORK_FACTOR } = require("../config");
-const { NotFoundError } = require("../expressError");
+const { NotFoundError, BadRequestError } = require("../expressError");
 
 
 /** User of the site. */
@@ -19,14 +19,18 @@ class User {
     const hashedPassword = await bcrypt.hash(
       password, BCRYPT_WORK_FACTOR);
 
-    const result = await db.query(
-      `INSERT INTO users
-          (username, password, first_name, last_name, phone, join_at)
-        VALUES
-          ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
-        RETURNING username, password, first_name, last_name, phone`,
-      [username, hashedPassword, first_name, last_name, phone]
-    );
+    try {
+      const result = await db.query(
+        `INSERT INTO users
+            (username, password, first_name, last_name, phone, join_at)
+          VALUES
+            ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+          RETURNING username, password, first_name, last_name, phone`,
+        [username, hashedPassword, first_name, last_name, phone]
+      );
+    } catch (err) {
+      throw new BadRequestError("Username taken");
+    }
 
     return result.rows[0];
   }

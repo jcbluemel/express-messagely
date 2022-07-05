@@ -36,8 +36,13 @@ describe("Auth Routes Test", function () {
           last_name: "Smith",
           phone: "+14150000000"
         });
+      // console.log("$$$$$$$$$$$$$$$$$$$", response.body);
       let token = response.body.token;
-      expect(jwt.decode(token)).toEqual("bob");
+      // console.log("#########################", jwt.decode(token));
+      expect(jwt.decode(token)).toEqual({
+        username: "bob",
+        iat: expect.any(Number)
+      });
     });
   });
 
@@ -50,7 +55,10 @@ describe("Auth Routes Test", function () {
         .send({ username: "test1", password: "password" });
 
       let token = response.body.token;
-      expect(jwt.decode(token)).toEqual("test1");
+      expect(jwt.decode(token)).toEqual({
+        username: "test1",
+        iat: expect.any(Number)
+      });
     });
 
     test("won't login w/wrong password", async function () {

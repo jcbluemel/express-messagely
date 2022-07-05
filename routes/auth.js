@@ -34,12 +34,15 @@ router.post("/login", async function (req, res, next) {
 
 router.post("/register", async function (req, res, next) {
 
-const { username, password, first_name, last_name, phone } = req.body;
+  const { username, password, first_name, last_name, phone } = req.body;
 
-const user = await User.register(
-  username, password, first_name, last_name, phone);
+  const user = await User.register(
+    username, password, first_name, last_name, phone);
 
+  await User.updateLoginTimestamp(username);
+  const token = jwt.sign(username, SECRET_KEY);
 
+  return res.json({ token });
 });
 
 

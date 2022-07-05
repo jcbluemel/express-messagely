@@ -37,7 +37,7 @@ router.post("/register", async function (req, res, next) {
   const { username, password, first_name, last_name, phone } = req.body;
 
   const user = await User.register(
-    username, password, first_name, last_name, phone);
+    { username, password, first_name, last_name, phone });
 
   const token = jwt.sign(user.username, SECRET_KEY);
   await User.updateLoginTimestamp(user.username);

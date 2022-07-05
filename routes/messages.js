@@ -1,5 +1,6 @@
 "use strict";
 
+const { ensureLoggedIn } = require("../middleware/auth");
 const Message = require("../models/message");
 const { UnauthorizedError } = require("../expressError");
 
@@ -18,17 +19,16 @@ const router = new Router();
  * Makes sure that the currently-logged-in users is either the to or from user.
  *
  **/
-router.get("/:id", ensureCorrectUser, async function (req, res) {
+router.get("/:id", ensureLoggedIn, async function (req, res) {
   const id = req.params.id;
   const msg = await Message.get(id);
-  try {
-    if (req.locals.user.username === msg.from_user.username ||
-        req.locals.user.username === msg.to_user.username) {
-      return res.json({ msg });
-    }
-  } catch (err) {
-    throw new UnauthorizedError("You do not have permission to view this message.");
+
+  if (!(res.locals.user.username === msg.from_user.username) ||
+      !(res.locals.user.username === msg.to_user.username)) {
+      throw new UnauthorizedError("You do not have permission to view this message.");
   }
+
+  return res.json({ msg });
 });
 
 /** POST / - post message.

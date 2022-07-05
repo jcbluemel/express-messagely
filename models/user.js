@@ -15,7 +15,6 @@ class User {
    */
 
   static async register({ username, password, first_name, last_name, phone }) {
-
     const hashedPassword = await bcrypt.hash(
       password, BCRYPT_WORK_FACTOR);
     let result;

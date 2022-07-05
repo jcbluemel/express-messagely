@@ -36,12 +36,8 @@ describe("Auth Routes Test", function () {
           last_name: "Smith",
           phone: "+14150000000"
         });
-
       let token = response.body.token;
-      expect(jwt.decode(token)).toEqual({
-        username: "bob",
-        iat: expect.any(Number)
-      });
+      expect(jwt.decode(token)).toEqual("bob");
     });
   });
 
@@ -54,10 +50,7 @@ describe("Auth Routes Test", function () {
         .send({ username: "test1", password: "password" });
 
       let token = response.body.token;
-      expect(jwt.decode(token)).toEqual({
-        username: "test1",
-        iat: expect.any(Number)
-      });
+      expect(jwt.decode(token)).toEqual("test1");
     });
 
     test("won't login w/wrong password", async function () {

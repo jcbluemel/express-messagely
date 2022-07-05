@@ -1,7 +1,10 @@
 "use strict";
 
+const { ensureLoggedIn } = require("../middleware/auth");
+
 const Router = require("express").Router;
 const router = new Router();
+const User = require("../models/user")
 
 
 /** GET / - get list of users.
@@ -9,6 +12,10 @@ const router = new Router();
  * => {users: [{username, first_name, last_name}, ...]}
  *
  **/
+router.get("/", ensureLoggedIn, async function(req, res){
+  const users = User.all()
+  return res.json( {users} )
+})
 
 
 /** GET /:username - get detail of users.

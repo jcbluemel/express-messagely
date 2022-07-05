@@ -18,9 +18,9 @@ class User {
 
     const hashedPassword = await bcrypt.hash(
       password, BCRYPT_WORK_FACTOR);
-
+    let result;
     try {
-      const result = await db.query(
+      result = await db.query(
         `INSERT INTO users
             (username, password, first_name, last_name, phone, join_at)
           VALUES

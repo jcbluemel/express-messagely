@@ -13,7 +13,7 @@ const User = require("../models/user");
  *
  **/
 router.get("/", ensureLoggedIn, async function (req, res) {
-  const users = User.all();
+  const users = await User.all();
   return res.json({ users });
 });
 
@@ -25,7 +25,7 @@ router.get("/", ensureLoggedIn, async function (req, res) {
  **/
 router.get("/:username", ensureCorrectUser, async function (req, res) {
   const username = req.params.username;
-  const user = User.get(username);
+  const user = await User.get(username);
   return res.json({ user });
 });
 
@@ -41,7 +41,7 @@ router.get("/:username", ensureCorrectUser, async function (req, res) {
  **/
 router.get("/:username/to", ensureCorrectUser, async function (req, res) {
   const username = req.params.username;
-  const messages = User.messagesTo(username);
+  const messages = await User.messagesTo(username);
   return res.json({ messages });
 });
 
@@ -57,7 +57,7 @@ router.get("/:username/to", ensureCorrectUser, async function (req, res) {
  **/
 router.get("/:username/from", ensureCorrectUser, async function (req, res) {
   const username = req.params.username;
-  const messages = User.messagesFrom(username);
+  const messages = await User.messagesFrom(username);
   return res.json({ messages });
 });
 
